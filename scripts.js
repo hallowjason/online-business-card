@@ -6,6 +6,7 @@ const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/value
 async function fetchSheetData() {
     const res = await fetch(API_URL);
     const data = await res.json();
+    console.log('Google Sheets 取得資料：', data);
     const rows = data.values;
     return rows.slice(1).map(row => ({
         frontName: row[1],
