@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>線上名片系統</title>
-  <meta name="description" content="自動生成的線上名片，動態取自Google試算表">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>線上名片清單</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>線上名片清單</h1>
-  <div id="card-list"></div>
-  <script src="scripts.js"></script>
+    <h1>線上名片清單</h1>
+    <div id="card-list" class="list-grid"></div>
+<script src="scripts.js"></script>
+<script>
+fetchCardList(); // 從 Google Sheets 抓取所有資料
+</script>
 </body>
 </html>

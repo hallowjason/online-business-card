@@ -1,79 +1,92 @@
-const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';    // Google試算表ID
-const SHEET_NAME = '表單回應 1';                                       // 工作表名稱如「工作表1」，請依你的sheet實際名稱修改
-const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI';                                     // <-- 填入你的API KEY
+const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
+const SHEET_NAME = '表單回應 1';
+const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI';
+const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?alt=json&key=${API_KEY}`;
 
-const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?alt=json&key=${API_KEY}`;
-
-async function fetchCardData() {
-  try {
+async function fetchSheetData() {
     const res = await fetch(API_URL);
     const data = await res.json();
     const rows = data.values;
-    const header = rows[0];
-    const records = rows.slice(1);
+    return rows.slice(1).map(row => ({
+        frontName: row[1],
+        frontPhone: row[2],
+        frontEmail: row[3],
+        backName: row[4],
+        backPhone: row[5],
+        backEmail: row[6],
+        skills: row[7],
+        brief: row[8],
+        styleId: row[9] || 'default',
+        customLink: row[10] || ''
+    }));
+}
 
+function maskEmail(email) {
+    const [name, domain] = email.split('@');
+    return name[0] + "***@" + domain;
+}
+
+async function fetchCardList() {
+    const data = await fetchSheetData();
     const listElem = document.getElementById('card-list');
     listElem.innerHTML = '';
-
-    records.forEach(row => {
-      const email = row[2];    // D欄 email（正面）
-      const urlKey = email.split('@')[0];
-
-      // 卡片元素
-      const card = document.createElement('div');
-      card.className = 'card-container';
-      card.innerHTML = `
-        <div class="card" onclick="this.classList.toggle('flipped')">
-          <div class="front">
-            <h2>${row[0]}</h2>
-            <p>簡述：${row[8]}</p>
-            <p>電話：${row[1]}</p>
-            <p>Email：<span class="js-email">${maskEmail(email)}</span></p>
-            <p>技能：${row[7]}</p>
-            <button onclick="shareCard('${email}'); event.stopPropagation()">分享</button>
-            <button onclick="copyText('${email}'); event.stopPropagation()">複製Email</button>
-          </div>
-          <div class="back">
-            <h2>${row[4]}</h2>
-            <p>電話：${row[5]}</p>
-            <p>Email：<span class="js-email">${maskEmail(row[6])}</span></p>
-            ${row[10] ? `<a href="${row[10]}" target="_blank">自訂連結</a>` : ''}
-          </div>
-        </div>
-        <p style="text-align:center;">網址：https://hallowjason.github.io/online-business-card/${urlKey}</p>
-      `;
-      listElem.appendChild(card);
+    data.forEach(card => {
+        const urlKey = card.frontEmail.split('@')[0];
+        const div = document.createElement('div');
+        div.className = 'card-summary';
+        div.innerHTML = `
+            <h3>${card.frontName}</h3>
+            <p>${card.brief}</p>
+            <a href="card.html?user=${urlKey}">檢視名片</a>
+        `;
+        listElem.appendChild(div);
     });
-  } catch (e) {
-    document.getElementById('card-list').innerHTML =
-      "資料讀取失敗，請確認Google試算表設定為公開，API KEY正確。<br>" + e;
-  }
 }
 
-// Email混淆：防爬蟲
-function maskEmail(email) {
-  return email.replace(/@/, ' [at] ');
-}
-
-// 分享功能（Web Share API，僅部分瀏覽器支援）
-function shareCard(email) {
-  const urlKey = email.split('@')[0];
-  const shareUrl = `https://hallowjason.github.io/online-business-card/${urlKey}`;
-  if (navigator.share) {
-    navigator.share({
-      title: '分享名片',
-      url: shareUrl,
+async function loadSingleCard() {
+    const params = new URLSearchParams(window.location.search);
+    const userKey = params.get('user');
+    const data = await fetchSheetData();
+    const cardData = data.find(c => c.frontEmail.split('@')[0] === userKey);
+    if (!cardData) {
+        document.body.innerHTML = '<p>找不到該名片</p>';
+        return;
+    }
+    // 主題套用
+    document.body.classList.add(`theme-${cardData.styleId}`);
+    // 前後內容
+    document.getElementById('card-front').innerHTML = `
+        <h2>${cardData.frontName}</h2>
+        <p>電話：${cardData.frontPhone}</p>
+        <p>Email：${maskEmail(cardData.frontEmail)}</p>
+        <p>技能：${cardData.skills}</p>
+    `;
+    document.getElementById('card-back').innerHTML = `
+        <h2>${cardData.backName}</h2>
+        <p>電話：${cardData.backPhone}</p>
+        <p>Email：${maskEmail(cardData.backEmail)}</p>
+        ${cardData.customLink ? `<p><a href="${cardData.customLink}" target="_blank">自訂連結</a></p>` : ''}
+    `;
+    // SEO meta
+    document.getElementById('page-title').textContent = `${cardData.frontName} - 名片`;
+    // 翻轉事件
+    document.getElementById('business-card').addEventListener('click', e => {
+        e.currentTarget.classList.toggle('flipped');
     });
-  } else {
-    alert('此瀏覽器不支援App分享');
-  }
+    // 分享與複製
+    document.getElementById('share-btn').addEventListener('click', () => {
+        if (navigator.share) {
+            navigator.share({
+                title: `${cardData.frontName}的名片`,
+                url: window.location.href
+            });
+        } else {
+            alert('此瀏覽器不支援分享功能');
+        }
+    });
+    document.getElementById('copy-btn').addEventListener('click', () => {
+        navigator.clipboard.writeText(`${cardData.frontName}\n${cardData.frontPhone}\n${cardData.frontEmail}`);
+        alert('聯絡資訊已複製');
+    });
 }
 
-// 複製功能
-function copyText(text) {
-  navigator.clipboard.writeText(text);
-  alert('已複製Email');
-}
-
-// 頁面載入自動fetch資料
-document.addEventListener('DOMContentLoaded', fetchCardData);

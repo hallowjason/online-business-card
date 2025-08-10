@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">名片</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card-container">
+        <div class="card" id="business-card">
+            <div class="front" id="card-front"></div>
+            <div class="back" id="card-back"></div>
+        </div>
+    </div>
+    <div class="actions">
+        <button id="share-btn">分享名片</button>
+        <button id="copy-btn">複製聯絡資訊</button>
+    </div>
+<script src="scripts.js"></script>
+<script>
+loadSingleCard(); // 從 Google Sheets 載入單筆名片資料
+</script>
+</body>
+</html>

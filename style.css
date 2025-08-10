@@ -1,59 +1,60 @@
 body {
-  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-  background: var(--bg-color, #f8f8f8);
-  margin: 0;
-  padding: 2rem;
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg-color, #f8f8f8);
+    margin: 0;
+    padding: 2rem;
 }
 
 h1 {
-  text-align: center;
-  margin-bottom: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.list-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
 }
 
 .card-container {
-  display: inline-block;
-  margin: 1rem;
-  perspective: 1000px;
+    perspective: 1000px;
 }
 
 .card {
-  width: 350px;
-  height: 200px;
-  position: relative;
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-  cursor: pointer;
+    width: 350px;
+    height: 200px;
+    position: relative;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    cursor: pointer;
 }
 
 .card.flipped {
-  transform: rotateY(180deg);
+    transform: rotateY(180deg);
 }
 
 .card .front,
 .card .back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  backface-visibility: hidden;
-  padding: 1rem;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--card-bg, white);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    backface-visibility: hidden;
+    padding: 1rem;
 }
 
 .card .back {
-  transform: rotateY(180deg);
-  background: #eaeaea;
+    transform: rotateY(180deg);
+    background: var(--card-back-bg, #eaeaea);
 }
 
-.theme-dark .card .front {
-  background: #232323;
-  color: #fff;
+/* 主題範例 */
+.theme-dark {
+    --bg-color: #232323;
+    --card-bg: #232323;
+    --card-back-bg: #181818;
+    color: white;
 }
-
-.theme-dark .card .back {
-  background: #181818;
-  color: #fff;
-}
-
-/* 可以持續擴充更多主題... */
