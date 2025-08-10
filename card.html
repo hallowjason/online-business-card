@@ -1,180 +1,250 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=390, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=380, initial-scale=1.0" />
   <title id="page-title">名片</title>
   <style>
+    :root{
+      /* 尺寸與間距控制 */
+      --card-w: 380px;
+      --card-h: 540px;
+      --safe-x: 15%;              /* 左右安全距離比例 */
+      --radius: 16px;
+
+      /* 色彩 */
+      --bg-page: #131313;
+      --front-grad-a: #ffffff;
+      --front-grad-b: #f6f7f9;
+      --back-grad-a: #23272F;
+      --back-grad-b: #101215;
+
+      --label-color-front: #8b8f95;
+      --value-color-front: #1d2127;
+
+      --label-color-back: #aeb3ba;
+      --value-color-back: #ffffff;
+
+      /* 字級（以 px 為主，值比 label 小 2pt ≈ 2.6px，這裡用 2px 接近） */
+      --label-size: 15px;
+      --value-size: 13px;
+
+      /* 播放器 */
+      --player-bg: #000;
+      --player-ctrl: #f0f0f0;
+      --player-ctrl-dim: #cfcfcf;
+      --player-track: #e6e6e6;
+      --player-track-fill: #d8d8d8;
+
+      /* 其他 */
+      --title-size: 19px;
+    }
+
     html, body {
       height: 100%;
       margin: 0;
-      background: #131313;
+      background: var(--bg-page);
       font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
       color: #fff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
+
     .card-container {
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      padding: 12px 0;
     }
+
     .card {
-      width: 390px;
-      height: 540px;
-      border-radius: 16px;
+      width: var(--card-w);
+      height: var(--card-h);
+      border-radius: var(--radius);
       position: relative;
       transition: transform 0.6s;
       transform-style: preserve-3d;
-      box-shadow: 0 6px 32px 0 rgba(0,0,0,0.28);
+      box-shadow: 0 6px 36px 0 rgba(0,0,0,0.32);
+      cursor: pointer;
       background: transparent;
       perspective: 1200px;
-      cursor: pointer;
     }
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
+    .card.flipped { transform: rotateY(180deg); }
+
     .card .front, .card .back {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 16px;
+      inset: 0;
+      border-radius: var(--radius);
       box-sizing: border-box;
       backface-visibility: hidden;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: flex-start;
-      padding: 0;
+      padding: 0 calc(var(--safe-x)) 36px calc(var(--safe-x));
+      overflow: hidden;
     }
-    /* 正面白灰漸層底色 */
+
+    /* 正面白灰漸層 */
     .card .front {
-      background: linear-gradient(162deg, #ffffff 0%, #f6f7f9 100%);
-      color: #191919;
+      background: linear-gradient(162deg, var(--front-grad-a) 0%, var(--front-grad-b) 100%);
+      color: var(--value-color-front);
     }
-    /* 背面深灰黑漸層底色 */
+    /* 背面深灰黑漸層 */
     .card .back {
-      background: linear-gradient(148deg, #202229 0%, #0b0c0f 100%);
-      color: #fff;
+      background: linear-gradient(147deg, var(--back-grad-a) 0%, var(--back-grad-b) 100%);
+      color: var(--value-color-back);
       transform: rotateY(180deg);
     }
-    /* 內容主區塊，左右邊界和logo對齊 */
-    .card-main {
-      width: 318px; /* 390-(36*2) */
-      min-height: 10px;
-      margin: 0 auto;
-      padding: 0;
+
+    /* LOGO 與播放器等寬：寬度＝卡片寬 - 左右安全距離 */
+    .card-logo{
+      width: calc(100% - 0px); /* 容器撐滿安全區 */
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
+      justify-content: center;
     }
-    /* LOGO圖片 */
-    .card-logo img {
-      width: 318px;
-      max-width: 100%;
+    .card-logo img{
+      width: 100%;
       height: auto;
+      max-width: calc(100%);   /* 等同播放器寬 */
       display: block;
-      margin: 38px auto 0 auto;
+      margin-top: 38px;
     }
+
     .card-title {
-      font-size: 1.16rem;
-      font-weight: 600;
-      margin: 26px 0 12px 0;
-      letter-spacing: 1px;
-      text-align: left;
+      font-size: var(--title-size);
+      font-weight: 650;
+      margin: 24px 0 8px 0;
+      letter-spacing: 0.6px;
+      color: inherit;
     }
+
     .card-info-list {
-      font-size: 1rem;
+      margin: 0;
+      font-size: var(--label-size);
       line-height: 1.7;
-      margin-bottom: 4px;
+      color: inherit;
     }
     .card-info-item {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr;
       gap: 0.8em;
-      margin-bottom: 2px;
+      align-items: start;
     }
-    .card-info-item .label {
-      color: #9fa8b6;
-      min-width: 62px;
+    .card-info-item + .card-info-item { margin-top: 2px; }
+
+    /* 名稱與值的對比：值比名稱小 2pt */
+    .front .label { color: var(--label-color-front); font-weight: 500; font-size: var(--label-size); }
+    .front .value { color: var(--value-color-front); font-weight: 400; font-size: var(--value-size); word-break: break-word; }
+
+    .back .label { color: var(--label-color-back); font-weight: 500; font-size: var(--label-size); }
+    .back .value { color: var(--value-color-back); font-weight: 400; font-size: var(--value-size); word-break: break-word; }
+
+    /* 簡述與技能 */
+    .card-brief {
+      margin-top: 12px;
+      font-size: var(--value-size);
+      color: #555a61;
+      line-height: 1.6;
       font-weight: 400;
-      font-size: 1rem;
-      letter-spacing: .2px;
-      flex-shrink: 0;
-    }
-    .card-info-item .value {
-      font-weight: 400 !important;
-      font-size: 1rem;
-      letter-spacing: .1px;
-      color: inherit;
-      word-break: break-word;
-      flex: 1 1 auto;
     }
     .card-skills {
-      margin: 10px 0 0 0;
-      color: #a09843;
-      font-size: 1rem;
+      margin-top: 10px;
+      color: #8d8642;
+      font-size: var(--value-size);
       font-weight: 500;
+      letter-spacing: 0.2px;
     }
-    /* 音樂播放器塊 */
+
+    /* 音樂播放器區（黑底） */
     .card-audio-player {
-      margin-top: 20px;
-      background: #000;
-      border-radius: 11px;
-      padding: 14px 18px 10px 18px;
-      width: 318px;
-      box-sizing: border-box;
+      margin-top: 18px;
+      background: var(--player-bg);
+      border-radius: 12px;
+      padding: 12px 14px 14px 14px;
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      box-shadow: 0 2px 12px #00000014;
+      gap: 6px;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.18);
     }
     .audio-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      margin-bottom: 6px;
+      width: 100%;
+      line-height: 1.2;
     }
     .audio-meta .song {
-      color: #fff;
-      font-size: 1.04rem;
-      font-weight: 600;
-      line-height: 1.2;
-      margin-bottom: 2px;
-      text-shadow: 0 1px 4px #12121299;
+      color: #f5f5f5;
+      font-size: 13.5px;    /* 比之前再稍微小一點 */
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      display: block;
     }
     .audio-meta .artist {
-      color: #e1e1e1;
-      font-size: 0.98rem;
+      color: #cfcfcf;
+      font-size: 12.5px;    /* 次級資訊更小 */
       font-weight: 400;
-      line-height: 1;
-      text-shadow: 0 1px 4px #1212127f;
+      margin-top: 2px;
+      display: block;
     }
     audio {
       width: 100%;
+      height: 34px;
       outline: none;
-      height: 30px;
-      margin-top: 0;
       background: transparent;
       border-radius: 8px;
     }
-    audio::-webkit-media-controls-panel {
-      background: #000 !important;
+
+    /* 以下為 WebKit（Safari/Chrome）播放器控制色客製，其他瀏覽器優雅退化 */
+    audio::-webkit-media-controls-panel{
+      background: #111;          /* 控制列底色接近黑 */
+      color: var(--player-ctrl); /* 文字圖示色（不一定全支援） */
       border-radius: 8px;
     }
-    /* 卡片底提示 */
+    audio::-webkit-media-controls-enclosure{
+      border-radius: 8px;
+      box-shadow: none;
+      background: #111;
+    }
+    audio::-webkit-media-controls-play-button{
+      filter: invert(90%);       /* 亮化為灰白 */
+      opacity: 0.92;
+    }
+    audio::-webkit-media-controls-mute-button{
+      filter: invert(85%);
+      opacity: 0.9;
+    }
+    audio::-webkit-media-controls-timeline-container{
+      color: var(--player-ctrl);
+    }
+    audio::-webkit-media-controls-current-time-display,
+    audio::-webkit-media-controls-time-remaining-display{
+      color: var(--player-ctrl);
+    }
+    audio::-webkit-media-controls-timeline{
+      /* 無法直接改顏色，使用濾鏡提升亮度 */
+      filter: invert(90%);
+    }
+    audio::-webkit-media-controls-volume-slider{
+      filter: invert(90%);
+    }
+
     .card-bottom-tip {
       position: absolute;
       left: 50%;
-      bottom: 21px;
+      bottom: 18px;
       transform: translateX(-50%);
       color: #bdbdbd;
-      font-size: 1.05rem;
+      font-size: 16px;
       font-weight: 500;
-      opacity: 0.78;
-      letter-spacing: 1.3px;
+      opacity: 0.83;
+      letter-spacing: 0.6px;
+      pointer-events: none;
     }
+
     .actions {
       text-align: center;
       margin-top: 18px;
+      padding-bottom: 24px;
     }
     .actions button {
       background: #11f39a;
@@ -183,18 +253,24 @@
       margin: 4px;
       border-radius: 6px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 700;
       color: #232323;
       font-size: 1.02rem;
+      box-shadow: 0 2px 10px #00000010;
+      transition: background .12s;
     }
-    .actions button:hover {
-      background: #0ed08d;
-    }
-    /* 行動裝置最佳化 */
-    @media (max-width: 440px) {
-      .card, .card-main, .card-audio-player { width: 95vw !important; max-width: 98vw !important;}
-      .card-main, .card-audio-player { width: 90vw !important; max-width: 93vw !important; }
-      .card-logo img { width: 90vw !important; max-width: 93vw !important;}
+    .actions button:hover { background: #0ed08d; }
+
+    /* 行動裝置最小字級保護與自適應 */
+    @media (max-width: 430px){
+      :root{ --card-w: 92vw; --card-h: 520px; }
+      .card { width: var(--card-w); height: var(--card-h); }
+      .card-bottom-tip{ font-size: 15px; }
+      .card-title{ font-size: 18px; }
+      .front .label, .back .label{ font-size: 14px; }
+      .front .value, .back .value{ font-size: 12px; }
+      .audio-meta .song{ font-size: 13px; }
+      .audio-meta .artist{ font-size: 12px; }
     }
   </style>
 </head>
@@ -204,125 +280,144 @@
       <!-- 正面 -->
       <div class="front" id="card-front">
         <div class="card-logo">
-          <img src="assets/images/logo-front.png" alt="Logo Front">
+          <img src="assets/images/logo-front.png" alt="Logo Front" />
         </div>
-        <div class="card-main">
-          <div class="card-title">My Contact Info.</div>
-          <div class="card-info-list">
-            <div class="card-info-item"><span class="label">name</span><span class="value" id="front-name">載入中...</span></div>
-            <div class="card-info-item"><span class="label">brief</span><span class="value" id="front-brief"></span></div>
-            <div class="card-info-item"><span class="label">phone</span><span class="value" id="front-phone"></span></div>
-            <div class="card-info-item"><span class="label">email</span><span class="value" id="front-email"></span></div>
-          </div>
-          <div class="card-skills" id="front-skills"></div>
-          <!-- 音樂播放器區 -->
-          <div class="card-audio-player">
-            <div class="audio-meta">
-              <span class="song">白陽使者逗陣走</span>
-              <span class="artist">師尊老大人</span>
-            </div>
-            <audio id="music-player" controls preload="auto">
-              <source src="assets/music/background-music.mp3" type="audio/mp3">
-              您的瀏覽器不支援音訊播放。
-            </audio>
-          </div>
+        <div class="card-title">My Contact Info.</div>
+
+        <div class="card-info-list">
+          <div class="card-info-item"><span class="label">name</span><span class="value" id="front-name">載入中...</span></div>
+          <div class="card-info-item"><span class="label">brief</span><span class="value" id="front-brief"></span></div>
+          <div class="card-info-item"><span class="label">phone</span><span class="value" id="front-phone"></span></div>
+          <div class="card-info-item"><span class="label">email</span><span class="value" id="front-email"></span></div>
         </div>
+
+        <div class="card-skills" id="front-skills"></div>
+
+        <!-- 音樂播放器區（黑底 + 亮色控制） -->
+        <div class="card-audio-player">
+          <div class="audio-meta">
+            <span class="song" id="audio-title">白陽使者逗陣走</span>
+            <span class="artist" id="audio-artist">師尊老大人</span>
+          </div>
+          <audio id="music-player" controls preload="auto">
+            <source src="assets/music/background-music.mp3" type="audio/mp3" />
+            您的瀏覽器不支援音訊播放。
+          </audio>
+        </div>
+
         <div class="card-bottom-tip">TAP TO FLIP</div>
       </div>
+
       <!-- 背面 -->
       <div class="back" id="card-back">
         <div class="card-logo">
-          <img src="assets/images/logo-back.png" alt="Logo Back">
+          <img src="assets/images/logo-back.png" alt="Logo Back" />
         </div>
-        <div class="card-main">
-          <div class="card-title">Emergency Contact</div>
-          <div class="card-info-list">
-            <div class="card-info-item"><span class="label">name</span><span class="value" id="back-name"></span></div>
-            <div class="card-info-item"><span class="label">phone</span><span class="value" id="back-phone"></span></div>
-            <div class="card-info-item"><span class="label">email</span><span class="value" id="back-email"></span></div>
-          </div>
+        <div class="card-title">Emergency Contact</div>
+        <div class="card-info-list">
+          <div class="card-info-item"><span class="label">name</span><span class="value" id="back-name"></span></div>
+          <div class="card-info-item"><span class="label">phone</span><span class="value" id="back-phone"></span></div>
+          <div class="card-info-item"><span class="label">email</span><span class="value" id="back-email"></span></div>
         </div>
         <div class="card-bottom-tip">TAP TO FLIP</div>
       </div>
     </div>
   </div>
+
   <div class="actions">
     <button id="share-btn">分享名片</button>
     <button id="copy-btn">複製聯絡資訊</button>
   </div>
-<script>
-const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
-const SHEET_NAME = '表單回應 1';
-const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI'; // 請換成你自己的Google Sheets API Key
-const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?alt=json&key=${API_KEY}`;
 
-function maskEmail(email) {
-  if (!email) return '';
-  const [name, domain] = email.split('@');
-  return name[0] + "***@" + domain;
-}
+  <script>
+    // 配置
+    const SHEET_ID   = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
+    const SHEET_NAME = '表單回應 1';
+    const API_KEY    = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI'; // 請替換為你自己的 Google Sheets API Key
+    const API_URL    = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?alt=json&key=${API_KEY}`;
 
-async function fetchSheetData() {
-  const res = await fetch(API_URL);
-  const data = await res.json();
-  const rows = data.values;
-  return rows.slice(1).map(row => ({
-    frontName: row[1],
-    frontPhone: row[2],
-    frontEmail: row[3],
-    backName: row[4],
-    backPhone: row[5],
-    backEmail: row[6],
-    skills: row[7],
-    brief: row[8]
-  }));
-}
-
-async function loadCardData() {
-  const params = new URLSearchParams(window.location.search);
-  const userKey = params.get('user');
-  const data = await fetchSheetData();
-  const cardData = data.find(c => c.frontEmail && c.frontEmail.split('@')[0] === userKey);
-  if (!cardData) {
-    document.body.innerHTML = '<p style="color:white;text-align:center;margin-top:50px;">找不到該名片</p>';
-    return;
-  }
-  document.getElementById('page-title').textContent = `${cardData.frontName} - 名片`;
-
-  document.getElementById('front-name').textContent = cardData.frontName || '';
-  document.getElementById('front-phone').textContent = cardData.frontPhone || '';
-  document.getElementById('front-email').textContent = maskEmail(cardData.frontEmail || '');
-  document.getElementById('front-skills').textContent = cardData.skills || '';
-  document.getElementById('front-brief').textContent = cardData.brief || '';
-
-  document.getElementById('back-name').textContent = cardData.backName || '';
-  document.getElementById('back-phone').textContent = cardData.backPhone || '';
-  document.getElementById('back-email').textContent = maskEmail(cardData.backEmail || '');
-
-  document.getElementById('business-card').addEventListener('click', e => {
-    e.currentTarget.classList.toggle('flipped');
-  });
-
-  document.getElementById('share-btn').addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `${cardData.frontName}的名片`,
-        url: window.location.href
-      });
-    } else {
-      alert('此瀏覽器不支援分享功能');
+    function maskEmail(email) {
+      if (!email) return '';
+      const [name, domain] = email.split('@');
+      return name + "***@" + domain;
     }
-  });
 
-  document.getElementById('copy-btn').addEventListener('click', () => {
-    navigator.clipboard.writeText(`${cardData.frontName}\n${cardData.frontPhone}\n${cardData.frontEmail}`);
-    alert('聯絡資訊已複製');
-  });
+    async function fetchSheetData() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const rows = data.values || [];
+      // 依你試算表欄位：B,C,D,E,F,G,H,I,...
+      // 映射成我們需要的物件（注意 index 對應）
+      return rows.slice(1).map(row => ({
+        frontName: row[1] || '',         // B
+        frontPhone: row[2] || '',        // C
+        frontEmail: row[3] || '',        // D
+        backName: row[4] || '',          // E
+        backPhone: row[1] || '',         // F
+        backEmail: row || '',         // G
+        skills: row || '',            // H
+        brief: row || ''              // I
+        // 如需未來加歌名/演唱者/音樂URL欄位，再擴充 row index
+      }));
+    }
 
-  document.getElementById('music-player').load();
-}
+    async function loadCardData() {
+      const params = new URLSearchParams(window.location.search);
+      const userKey = params.get('user'); // 取 email @ 前帳號
 
-loadCardData();
-</script>
+      const all = await fetchSheetData();
+      const cardData = all.find(c => (c.frontEmail || '').split('@')[0] === userKey);
+
+      if (!cardData) {
+        document.body.innerHTML = '<p style="color:white;text-align:center;margin-top:50px;">找不到該名片</p>';
+        return;
+      }
+
+      // Title
+      document.getElementById('page-title').textContent = `${cardData.frontName} - 名片`;
+
+      // 正面
+      document.getElementById('front-name').textContent  = cardData.frontName || '';
+      document.getElementById('front-phone').textContent = cardData.frontPhone || '';
+      document.getElementById('front-email').textContent = maskEmail(cardData.frontEmail || '');
+      document.getElementById('front-skills').textContent= cardData.skills || '';
+      document.getElementById('front-brief').textContent = cardData.brief || '';
+
+      // 背面
+      document.getElementById('back-name').textContent   = cardData.backName || '';
+      document.getElementById('back-phone').textContent  = cardData.backPhone || '';
+      document.getElementById('back-email').textContent  = maskEmail(cardData.backEmail || '');
+
+      // 翻轉
+      document.getElementById('business-card').addEventListener('click', (e) => {
+        e.currentTarget.classList.toggle('flipped');
+      });
+
+      // 分享
+      document.getElementById('share-btn').addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({
+            title: `${cardData.frontName}的名片`,
+            url: window.location.href
+          });
+        } else {
+          alert('此瀏覽器不支援分享功能');
+        }
+      });
+
+      // 複製
+      document.getElementById('copy-btn').addEventListener('click', () => {
+        const rawEmail = cardData.frontEmail || '';
+        navigator.clipboard.writeText(`${cardData.frontName}\n${cardData.frontPhone}\n${rawEmail}`);
+        alert('聯絡資訊已複製');
+      });
+
+      // 確保音訊載入（檔名請使用英文與小寫）
+      const player = document.getElementById('music-player');
+      player.load();
+    }
+
+    loadCardData();
+  </script>
 </body>
 </html>
