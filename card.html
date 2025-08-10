@@ -43,8 +43,8 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      padding-bottom: 36px;
-      /* 由 .front/.back 單獨設背景 */
+      /* 內邊距，確保安全距離 */
+      padding: 0 20px 36px 20px;
     }
     /* 正面白灰漸層底色 */
     .card .front {
@@ -57,9 +57,10 @@
       color: #fff;
       transform: rotateY(180deg);
     }
-    /* LOGO圖片 */
+    /* LOGO圖片大小與播放器同寬 */
     .card-logo img {
-      max-width: 175px;
+      width: calc(100% - 40px);
+      max-width: 100%;
       height: auto;
       display: block;
       margin: 38px auto 0 auto;
@@ -67,13 +68,13 @@
     .card-title {
       font-size: 1.18rem;
       font-weight: 650;
-      margin: 28px 0 8px 34px;
+      margin: 24px 0 8px 0;
       letter-spacing: 1px;
     }
     .card-info-list {
-      margin: 0 0 0 34px;
+      margin: 0;
       font-size: 1rem;
-      line-height: 1.8;
+      line-height: 1.7;
     }
     .card-info-item {
       display: flex;
@@ -85,71 +86,54 @@
       min-width: 65px;
       font-weight: 400;
       font-size: 1rem;
-      letter-spacing: .2px;
     }
     .card-info-item .value {
-      color: inherit;
       font-weight: 400 !important;
-      /* 降低字重 */
       font-size: 1rem;
-      letter-spacing: .2px;
-      word-break: break-all;
+      word-break: break-word;
     }
-    /* --簡述-- */
-    .card-brief {
-      margin: 15px 30px 0 34px;
-      font-size: 1rem;
-      color: #51545a;
-      font-weight: 400;
-      line-height: 1.6;
-    }
-    /* --技能-- */
     .card-skills {
-      margin: 13px 30px 0 34px;
+      margin: 13px 0 0 0;
       color: #a09843;
       font-size: 1rem;
       font-weight: 500;
-      letter-spacing: 0.3px;
     }
     /* 音樂播放器 */
     .card-audio-player {
-      margin: 34px 30px 0 34px;
-      background: #ededed;
+      margin-top: 20px;
+      background: #000;
       border-radius: 11px;
       padding: 12px 16px;
-      box-shadow: 0 3px 22px #00000012;
       display: flex;
       flex-direction: column;
-      gap: 6px;
       align-items: flex-start;
     }
     .audio-meta {
-      color: #262727;
-      font-size: 1.01rem;
-      letter-spacing: 0.2px;
-      font-weight: 400;
-      margin-bottom: 6px;
+      width: 100%;
+    }
+    .audio-meta .song {
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
     }
     .audio-meta .artist {
-      color: #7d7e85;
-      font-size: 0.93rem;
-      margin-left: 12px;
+      color: #ccc;
+      font-size: 0.9rem;
+      margin-top: 2px;
+      display: block;
       font-weight: 400;
     }
     audio {
       width: 100%;
       outline: none;
       height: 32px;
-      border-radius: 6px;
-      /* Flat風格 */
+      margin-top: 6px;
       background: transparent;
     }
-    /* 修飾audio按鈕-僅作用於chrome/safari */
     audio::-webkit-media-controls-panel {
-      background: #f6f7f9;
+      background: #000;
       border-radius: 6px;
     }
-    /* 卡片底提示 */
     .card-bottom-tip {
       position: absolute;
       left: 50%;
@@ -157,7 +141,6 @@
       transform: translateX(-50%);
       color: #bdbdbd;
       font-size: 1.07rem;
-      letter-spacing: 1px;
       font-weight: 500;
       opacity: 0.83;
     }
@@ -175,26 +158,9 @@
       font-weight: bold;
       color: #232323;
       font-size: 1.02rem;
-      box-shadow: 0 2px 10px #00000010;
-      transition: background .12s;
     }
     .actions button:hover {
       background: #0ed08d;
-    }
-    /* 行動裝置最佳化 */
-    @media (max-width: 430px) {
-      .card {
-        width: 95vw;
-        min-width: 0;
-        height: 490px;
-      }
-      .card-audio-player {
-        margin: 34px 8px 0 10px;
-      }
-      .card-title, .card-info-list, .card-skills, .card-brief {
-        margin-left: 13px !important;
-        margin-right: 13px !important;
-      }
     }
   </style>
 </head>
@@ -217,15 +183,15 @@
         <!-- 音樂播放器區 -->
         <div class="card-audio-player">
           <div class="audio-meta">
-            <span id="audio-title">白陽使者逐陣走</span>
-            <span class="artist" id="audio-artist">仙佛</span>
+            <span class="song">白陽使者逗陣走</span>
+            <span class="artist">師尊老大人</span>
           </div>
           <audio id="music-player" controls preload="auto">
             <source src="assets/music/background-music.mp3" type="audio/mp3">
             您的瀏覽器不支援音訊播放。
           </audio>
         </div>
-        <div class="card-bottom-tip">TURN TO FLIP</div>
+        <div class="card-bottom-tip">TAP TO FLIP</div>
       </div>
       <!-- 背面 -->
       <div class="back" id="card-back">
@@ -250,8 +216,8 @@
 const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
 const SHEET_NAME = '表單回應 1';
 const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI';
-
 const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?alt=json&key=${API_KEY}`;
+
 function maskEmail(email) {
   if (!email) return '';
   const [name, domain] = email.split('@');
@@ -295,12 +261,10 @@ async function loadCardData() {
   document.getElementById('back-phone').textContent = cardData.backPhone || '';
   document.getElementById('back-email').textContent = maskEmail(cardData.backEmail || '');
 
-  // 翻轉卡片
   document.getElementById('business-card').addEventListener('click', e => {
     e.currentTarget.classList.toggle('flipped');
   });
 
-  // 分享
   document.getElementById('share-btn').addEventListener('click', () => {
     if (navigator.share) {
       navigator.share({
@@ -312,15 +276,12 @@ async function loadCardData() {
     }
   });
 
-  // 複製
   document.getElementById('copy-btn').addEventListener('click', () => {
     navigator.clipboard.writeText(`${cardData.frontName}\n${cardData.frontPhone}\n${cardData.frontEmail}`);
     alert('聯絡資訊已複製');
   });
 
-  // 確保 audio 能播放（有時 github 伺服器路徑若 mp3 有中文名稱會異常，請務必音樂檔命名為英文）
-  const player = document.getElementById('music-player');
-  player.load();
+  document.getElementById('music-player').load();
 }
 
 loadCardData();
