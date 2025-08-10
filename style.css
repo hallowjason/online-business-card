@@ -18,38 +18,122 @@ h1 {
 }
 
 .card-container {
-    perspective: 1000px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+  background: #131313;
 }
 
 .card {
-    width: 350px;
-    height: 200px;
-    position: relative;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-    cursor: pointer;
+  width: 380px;
+  height: 540px;
+  border-radius: 16px;
+  background: #191919;
+  box-shadow: 0 6px 36px rgba(0,0,0,0.4);
+  position: relative;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  perspective: 1200px;
 }
 
 .card.flipped {
-    transform: rotateY(180deg);
+  transform: rotateY(180deg);
 }
 
-.card .front,
-.card .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: var(--card-bg, white);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    backface-visibility: hidden;
-    padding: 1rem;
+.card .front, .card .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 0 0 36px 0;
+  background: #191919;
+  color: #fff;
+  border-radius: 16px;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .card .back {
-    transform: rotateY(180deg);
-    background: var(--card-back-bg, #eaeaea);
+  transform: rotateY(180deg);
 }
+
+.card-logo {
+  margin: 38px auto 0 auto;
+  width: 180px;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-align: center;
+}
+.card-logo .f-col {
+  color: #84e062; /* 符合F圖示色 */
+}
+.card-logo .o-dot {
+  color: #11f39a;
+}
+
+.card-title {
+  font-size: 1.21rem;
+  font-weight: bold;
+  margin: 24px 0 9px 34px;
+}
+
+.card-info-list {
+  margin: 0 0 0 34px;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.card-info-item {
+  display: flex;
+  gap: 0.8em;
+  margin-bottom: 0.13em;
+}
+.card-info-item .label {
+  color: #a0a0a0;
+  min-width: 74px;
+}
+.card-info-item .value {
+  color: #fff;
+  font-weight: 500;
+}
+
+.card-brief {
+  margin: 20px 30px 0 34px;
+  font-size: 1rem;
+  color: #dcdcdc;
+}
+
+.card-skills {
+  margin: 22px 30px 0 34px;
+  color: #f4ef77;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.card-bottom-tip {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  color: #a0a0a0;
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  font-weight: 500;
+  opacity: 0.87;
+}
+
+/* 背面專屬調整 */
+.card .back .card-title {
+  margin-top: 36px;
+}
+.card .back .card-info-list {
+  margin-top: 25px;
+}
+
 
 /* 主題範例 */
 .theme-dark {
