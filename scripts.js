@@ -1,6 +1,6 @@
 const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
 const SHEET_NAME = '表單回應 1';
-const API_KEY = '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';
+const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI';
 const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?alt=json&key=${API_KEY}`;
 
 async function fetchSheetData() {
