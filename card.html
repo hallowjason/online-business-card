@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=380, initial-scale=1.0">
+  <meta name="viewport" content="width=390, initial-scale=1.0">
   <title id="page-title">名片</title>
   <style>
     html, body {
@@ -19,16 +19,16 @@
       min-height: 100vh;
     }
     .card {
-      width: 380px;
+      width: 390px;
       height: 540px;
       border-radius: 16px;
       position: relative;
       transition: transform 0.6s;
       transform-style: preserve-3d;
-      box-shadow: 0 6px 36px 0 rgba(0,0,0,0.32);
-      cursor: pointer;
+      box-shadow: 0 6px 32px 0 rgba(0,0,0,0.28);
       background: transparent;
       perspective: 1200px;
+      cursor: pointer;
     }
     .card.flipped {
       transform: rotateY(180deg);
@@ -42,9 +42,9 @@
       backface-visibility: hidden;
       display: flex;
       flex-direction: column;
+      align-items: center;
       justify-content: flex-start;
-      /* 內邊距，確保安全距離 */
-      padding: 0 20px 36px 20px;
+      padding: 0;
     }
     /* 正面白灰漸層底色 */
     .card .front {
@@ -53,100 +53,128 @@
     }
     /* 背面深灰黑漸層底色 */
     .card .back {
-      background: linear-gradient(147deg, #23272F 0%, #101215 100%);
+      background: linear-gradient(148deg, #202229 0%, #0b0c0f 100%);
       color: #fff;
       transform: rotateY(180deg);
     }
-    /* LOGO圖片大小與播放器同寬 */
+    /* 內容主區塊，左右邊界和logo對齊 */
+    .card-main {
+      width: 318px; /* 390-(36*2) */
+      min-height: 10px;
+      margin: 0 auto;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    /* LOGO圖片 */
     .card-logo img {
-      width: calc(100% - 40px);
+      width: 318px;
       max-width: 100%;
       height: auto;
       display: block;
       margin: 38px auto 0 auto;
     }
     .card-title {
-      font-size: 1.18rem;
-      font-weight: 650;
-      margin: 24px 0 8px 0;
+      font-size: 1.16rem;
+      font-weight: 600;
+      margin: 26px 0 12px 0;
       letter-spacing: 1px;
+      text-align: left;
     }
     .card-info-list {
-      margin: 0;
       font-size: 1rem;
       line-height: 1.7;
+      margin-bottom: 4px;
     }
     .card-info-item {
       display: flex;
       gap: 0.8em;
-      margin-bottom: 0em;
+      margin-bottom: 2px;
     }
     .card-info-item .label {
-      color: #a0a0a0;
-      min-width: 65px;
+      color: #9fa8b6;
+      min-width: 62px;
       font-weight: 400;
       font-size: 1rem;
+      letter-spacing: .2px;
+      flex-shrink: 0;
     }
     .card-info-item .value {
       font-weight: 400 !important;
       font-size: 1rem;
+      letter-spacing: .1px;
+      color: inherit;
       word-break: break-word;
+      flex: 1 1 auto;
     }
     .card-skills {
-      margin: 13px 0 0 0;
+      margin: 10px 0 0 0;
       color: #a09843;
       font-size: 1rem;
       font-weight: 500;
     }
-    /* 音樂播放器 */
+    /* 音樂播放器塊 */
     .card-audio-player {
       margin-top: 20px;
       background: #000;
       border-radius: 11px;
-      padding: 12px 16px;
+      padding: 14px 18px 10px 18px;
+      width: 318px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      box-shadow: 0 2px 12px #00000014;
+    }
+    .audio-meta {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-    }
-    .audio-meta {
-      width: 100%;
+      margin-bottom: 6px;
     }
     .audio-meta .song {
       color: #fff;
-      font-size: 1rem;
-      font-weight: 500;
+      font-size: 1.04rem;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 2px;
+      text-shadow: 0 1px 4px #12121299;
     }
     .audio-meta .artist {
-      color: #ccc;
-      font-size: 0.9rem;
-      margin-top: 2px;
-      display: block;
+      color: #e1e1e1;
+      font-size: 0.98rem;
       font-weight: 400;
+      line-height: 1;
+      text-shadow: 0 1px 4px #1212127f;
     }
     audio {
       width: 100%;
       outline: none;
-      height: 32px;
-      margin-top: 6px;
+      height: 30px;
+      margin-top: 0;
       background: transparent;
+      border-radius: 8px;
     }
     audio::-webkit-media-controls-panel {
-      background: #000;
-      border-radius: 6px;
+      background: #000 !important;
+      border-radius: 8px;
     }
+    /* 卡片底提示 */
     .card-bottom-tip {
       position: absolute;
       left: 50%;
       bottom: 21px;
       transform: translateX(-50%);
       color: #bdbdbd;
-      font-size: 1.07rem;
+      font-size: 1.05rem;
       font-weight: 500;
-      opacity: 0.83;
+      opacity: 0.78;
+      letter-spacing: 1.3px;
     }
     .actions {
       text-align: center;
-      margin-top: 22px;
+      margin-top: 18px;
     }
     .actions button {
       background: #11f39a;
@@ -162,6 +190,12 @@
     .actions button:hover {
       background: #0ed08d;
     }
+    /* 行動裝置最佳化 */
+    @media (max-width: 440px) {
+      .card, .card-main, .card-audio-player { width: 95vw !important; max-width: 98vw !important;}
+      .card-main, .card-audio-player { width: 90vw !important; max-width: 93vw !important; }
+      .card-logo img { width: 90vw !important; max-width: 93vw !important;}
+    }
   </style>
 </head>
 <body>
@@ -172,24 +206,26 @@
         <div class="card-logo">
           <img src="assets/images/logo-front.png" alt="Logo Front">
         </div>
-        <div class="card-title">My Contact Info.</div>
-        <div class="card-info-list">
-          <div class="card-info-item"><span class="label">name</span><span class="value" id="front-name">載入中...</span></div>
-          <div class="card-info-item"><span class="label">brief</span><span class="value" id="front-brief"></span></div>
-          <div class="card-info-item"><span class="label">phone</span><span class="value" id="front-phone"></span></div>
-          <div class="card-info-item"><span class="label">email</span><span class="value" id="front-email"></span></div>
-        </div>
-        <div class="card-skills" id="front-skills"></div>
-        <!-- 音樂播放器區 -->
-        <div class="card-audio-player">
-          <div class="audio-meta">
-            <span class="song">白陽使者逗陣走</span>
-            <span class="artist">師尊老大人</span>
+        <div class="card-main">
+          <div class="card-title">My Contact Info.</div>
+          <div class="card-info-list">
+            <div class="card-info-item"><span class="label">name</span><span class="value" id="front-name">載入中...</span></div>
+            <div class="card-info-item"><span class="label">brief</span><span class="value" id="front-brief"></span></div>
+            <div class="card-info-item"><span class="label">phone</span><span class="value" id="front-phone"></span></div>
+            <div class="card-info-item"><span class="label">email</span><span class="value" id="front-email"></span></div>
           </div>
-          <audio id="music-player" controls preload="auto">
-            <source src="assets/music/background-music.mp3" type="audio/mp3">
-            您的瀏覽器不支援音訊播放。
-          </audio>
+          <div class="card-skills" id="front-skills"></div>
+          <!-- 音樂播放器區 -->
+          <div class="card-audio-player">
+            <div class="audio-meta">
+              <span class="song">白陽使者逗陣走</span>
+              <span class="artist">師尊老大人</span>
+            </div>
+            <audio id="music-player" controls preload="auto">
+              <source src="assets/music/background-music.mp3" type="audio/mp3">
+              您的瀏覽器不支援音訊播放。
+            </audio>
+          </div>
         </div>
         <div class="card-bottom-tip">TAP TO FLIP</div>
       </div>
@@ -198,13 +234,15 @@
         <div class="card-logo">
           <img src="assets/images/logo-back.png" alt="Logo Back">
         </div>
-        <div class="card-title">Emergency Contact</div>
-        <div class="card-info-list">
-          <div class="card-info-item"><span class="label">name</span><span class="value" id="back-name"></span></div>
-          <div class="card-info-item"><span class="label">phone</span><span class="value" id="back-phone"></span></div>
-          <div class="card-info-item"><span class="label">email</span><span class="value" id="back-email"></span></div>
+        <div class="card-main">
+          <div class="card-title">Emergency Contact</div>
+          <div class="card-info-list">
+            <div class="card-info-item"><span class="label">name</span><span class="value" id="back-name"></span></div>
+            <div class="card-info-item"><span class="label">phone</span><span class="value" id="back-phone"></span></div>
+            <div class="card-info-item"><span class="label">email</span><span class="value" id="back-email"></span></div>
+          </div>
         </div>
-        <div class="card-bottom-tip">TURN TO FLIP</div>
+        <div class="card-bottom-tip">TAP TO FLIP</div>
       </div>
     </div>
   </div>
@@ -215,7 +253,7 @@
 <script>
 const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
 const SHEET_NAME = '表單回應 1';
-const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI';
+const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI'; // 請換成你自己的Google Sheets API Key
 const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?alt=json&key=${API_KEY}`;
 
 function maskEmail(email) {
