@@ -198,22 +198,40 @@
     }
         /* 全域金屬主題樣式 */
         .business-card {
-            background: linear-gradient(
-                var(--metal-angle, 135deg),
-                #c0c0c0 0%,
-                #f5f5f5 15%,
-                #ffffff 30%,
-                #e8e8e8 45%,
-                #d0d0d0 60%,
-                #f0f0f0 75%,
-                #b8b8b8 100%
-            ) !important;
             box-shadow: 
                 0 8px 32px rgba(0,0,0,0.4),
                 inset 0 1px 0 rgba(255,255,255,0.9),
                 inset 0 -1px 0 rgba(0,0,0,0.1) !important;
             position: relative;
             overflow: hidden;
+        }
+
+        /* 正面：明顯銀白底（角度動態） */
+        .front.business-card {
+          background: linear-gradient(
+            var(--metal-angle, 160deg),
+            #ffffff 0%,
+            #f8fafc 18%,
+            #eef2f7 36%,
+            #e6ebf2 54%,
+            #f7f9fb 72%,
+            #e9edf3 100%
+          ) !important;
+          color: #191919;
+        }
+
+        /* 背面：明顯銀黑底（角度動態） */
+        .back.business-card {
+          background: linear-gradient(
+            var(--metal-angle, 160deg),
+            #3a3d44 0%,
+            #272a2f 25%,
+            #191b20 50%,
+            #0f1114 70%,
+            #07080a 85%,
+            #000000 100%
+          ) !important;
+          color: #fff;
         }
 
         .business-card::before {
@@ -236,10 +254,21 @@
             opacity: var(--reflection-opacity, 0.45);
             z-index: 1;
         }
-        /* 讓面板內的所有內容覆蓋在反光層之上 */
-        .card .front > *, .card .back > * {
+        /* 讓面板內主要內容覆蓋在反光層之上，但排除底部提示，避免定位被覆蓋 */
+        .card .front > :not(.card-bottom-tip),
+        .card .back  > :not(.card-bottom-tip) {
           position: relative;
           z-index: 2;
+        }
+
+        /* 明確還原 TAP TO FLIP 的絕對定位與層級 */
+        .card .front .card-bottom-tip,
+        .card .back  .card-bottom-tip {
+          position: absolute;
+          z-index: 2;
+          left: 50%;
+          bottom: 21px;
+          transform: translateX(-50%);
         }
 
         .card-content {
@@ -321,121 +350,6 @@
     <button id="share-btn">分享名片</button>
     <button id="copy-btn">複製聯絡資訊</button>
   </div>
-<script>
-const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
-const SHEET_NAME = '表單回應 1';
-const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI'; // 請換成你自己的Google Sheets API Key
-const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?alt=json&key=${API_KEY}`;
-
-function maskEmail(email) {
-  if (!email) return '';
-  const [name, domain] = email.split('@');
-  return name[0] + "***@" + domain;
-}
-
-async function fetchSheetData() {
-  const res = await fetch(API_URL);
-  const data = await res.json();
-  const rows = data.values;
-  return rows.slice(1).map(row => ({
-    frontName: row[1],
-    frontPhone: row[2],
-    frontEmail: row[3],
-    backName: row[4],
-    backPhone: row[5],
-    backEmail: row[6],
-    skills: row[7],
-    brief: row[8]
-  }));
-}
-
-// 金屬動態反光：更新CSS變數
-function updateMetallicEffectLocal(alpha, beta, gamma) {
-  const root = document.getElementById('business-card');
-  if (!root) return;
-  const metalAngle = ((alpha || 0) + 135) % 360;
-  const reflectionAngle = ((gamma || 0) * 2 + 45) % 360;
-  const intensity = Math.min(1, Math.abs(beta || 0) / 90);
-  const reflection = Math.min(0.6, 0.25 + intensity * 0.35);
-  root.style.setProperty('--metal-angle', `${metalAngle}deg`);
-  root.style.setProperty('--reflection-angle', `${reflectionAngle}deg`);
-  root.style.setProperty('--reflection-opacity', reflection);
-}
-
-// 初始化動態反光（含 iOS 權限處理）
-function initCardMetallic() {
-  const root = document.getElementById('business-card');
-  if (root) root.style.setProperty('--reflection-opacity', 0.45);
-
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    const request = () => {
-      DeviceOrientationEvent.requestPermission().then(state => {
-        if (state === 'granted') {
-          window.addEventListener('deviceorientation', (e) => {
-            updateMetallicEffectLocal(e.alpha, e.beta, e.gamma);
-          });
-        }
-      }).catch(console.error);
-    };
-    const card = document.getElementById('business-card');
-    if (card) {
-      const once = () => { request(); card.removeEventListener('click', once); };
-      card.addEventListener('click', once);
-    }
-  } else if (typeof DeviceOrientationEvent !== 'undefined') {
-    window.addEventListener('deviceorientation', (e) => {
-      updateMetallicEffectLocal(e.alpha, e.beta, e.gamma);
-    });
-  }
-}
-
-async function loadCardData() {
-  const params = new URLSearchParams(window.location.search);
-  const userKey = params.get('user');
-  const data = await fetchSheetData();
-  const cardData = data.find(c => c.frontEmail && c.frontEmail.split('@')[0] === userKey);
-  if (!cardData) {
-    document.body.innerHTML = '<p style="color:white;text-align:center;margin-top:50px;">找不到該名片</p>';
-    return;
-  }
-  document.getElementById('page-title').textContent = `${cardData.frontName} - 名片`;
-
-  document.getElementById('front-name').textContent = cardData.frontName || '';
-  document.getElementById('front-phone').textContent = cardData.frontPhone || '';
-  document.getElementById('front-email').textContent = maskEmail(cardData.frontEmail || '');
-  document.getElementById('front-skills').textContent = cardData.skills || '';
-  document.getElementById('front-brief').textContent = cardData.brief || '';
-
-  document.getElementById('back-name').textContent = cardData.backName || '';
-  document.getElementById('back-phone').textContent = cardData.backPhone || '';
-  document.getElementById('back-email').textContent = maskEmail(cardData.backEmail || '');
-
-  document.getElementById('business-card').addEventListener('click', e => {
-    e.currentTarget.classList.toggle('flipped');
-  });
-
-  document.getElementById('share-btn').addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `${cardData.frontName}的名片`,
-        url: window.location.href
-      });
-    } else {
-      alert('此瀏覽器不支援分享功能');
-    }
-  });
-
-  document.getElementById('copy-btn').addEventListener('click', () => {
-    navigator.clipboard.writeText(`${cardData.frontName}\n${cardData.frontPhone}\n${cardData.frontEmail}`);
-    alert('聯絡資訊已複製');
-  });
-
-  document.getElementById('music-player').load();
-  initCardMetallic();
-}
-
-loadCardData();
-</script>
+  <script src="scripts.js"></script>
 </body>
 </html>

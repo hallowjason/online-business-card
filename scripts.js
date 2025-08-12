@@ -1,6 +1,7 @@
 // 設備方向偵測變數
 let isOrientationSupported = false;
 let lastOrientation = { alpha: 0, beta: 0, gamma: 0 };
+let orientationInitialized = false;
 const SHEET_ID = '1LMTaAiF-V-k7M4I-nFFVHBdGhrgvBcMldg39uhn70WM';
 const SHEET_NAME = '表單回應 1';
 const API_KEY = 'AIzaSyB9GfgAWI3ljgrEm3wl0VtKrXYVbGuv7ZI';
@@ -26,8 +27,9 @@ async function fetchSheetData() {
 }
 
 function maskEmail(email) {
+    if (!email || typeof email !== 'string' || !email.includes('@')) return '';
     const [name, domain] = email.split('@');
-    return name[0] + "***@" + domain;
+    return (name && name.length > 0 ? name[0] : '*') + "***@" + (domain || '');
 }
 
 // 更新金屬效果
@@ -50,24 +52,23 @@ function updateMetallicEffect(alpha, beta, gamma) {
 }
 
 // 初始化設備方向偵測
-function initDeviceOrientation() {
-    // 檢查瀏覽器支援
-    if (typeof DeviceOrientationEvent !== 'undefined') {
-        // 處理需要權限的情況（iOS 13+）
+async function ensureDeviceOrientationStarted() {
+    if (orientationInitialized) return true;
+    if (typeof DeviceOrientationEvent === 'undefined') return false;
+    try {
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission()
-                .then(permissionState => {
-                    if (permissionState === 'granted') {
-                        startOrientationListening();
-                    } else {
-                        console.log('設備方向權限被拒絕');
-                    }
-                })
-                .catch(console.error);
-        } else {
-            // 其他瀏覽器直接開始監聽
-            startOrientationListening();
+            const state = await DeviceOrientationEvent.requestPermission();
+            if (state !== 'granted') {
+                console.log('設備方向權限被拒絕');
+                return false;
+            }
         }
+        startOrientationListening();
+        orientationInitialized = true;
+        return true;
+    } catch (err) {
+        console.error(err);
+        return false;
     }
 }
 
@@ -111,54 +112,81 @@ async function fetchCardList() {
     });
 }
 
-async function loadSingleCard() {
+async function loadCardData() {
     const params = new URLSearchParams(window.location.search);
     const userKey = params.get('user');
     const data = await fetchSheetData();
-    const cardData = data.find(c => c.frontEmail.split('@')[0] === userKey);
+    const cardData = data.find(c => c.frontEmail && c.frontEmail.split('@')[0] === userKey);
     if (!cardData) {
-        document.body.innerHTML = '<p>找不到該名片</p>';
+        document.body.innerHTML = '<p style="color:white;text-align:center;margin-top:50px;">找不到該名片</p>';
         return;
     }
-
-    // 前後內容
-    document.getElementById('card-front').innerHTML = `
-        <h2>${cardData.frontName}</h2>
-        <p>電話：${cardData.frontPhone}</p>
-        <p>Email：${maskEmail(cardData.frontEmail)}</p>
-        <p>技能：${cardData.skills}</p>
-    `;
-    document.getElementById('card-back').innerHTML = `
-        <h2>${cardData.backName}</h2>
-        <p>電話：${cardData.backPhone}</p>
-        <p>Email：${maskEmail(cardData.backEmail)}</p>
-        ${cardData.customLink ? `<p><a href="${cardData.customLink}" target="_blank">自訂連結</a></p>` : ''}
-    `;
     // SEO meta
-    document.getElementById('page-title').textContent = `${cardData.frontName} - 名片`;
-    // 翻轉事件
-    document.getElementById('business-card').addEventListener('click', e => {
-        e.currentTarget.classList.toggle('flipped');
-    });
-    // 分享與複製
-    document.getElementById('share-btn').addEventListener('click', () => {
-        if (navigator.share) {
-            navigator.share({
-                title: `${cardData.frontName}的名片`,
-                url: window.location.href
-            });
-        } else {
-            alert('此瀏覽器不支援分享功能');
-        }
-    });
-    document.getElementById('copy-btn').addEventListener('click', () => {
-        navigator.clipboard.writeText(`${cardData.frontName}\n${cardData.frontPhone}\n${cardData.frontEmail}`);
-        alert('聯絡資訊已複製');
-    });
-    if (cardData.styleId === 'metallic') {
-        setTimeout(() => {
-            initDeviceOrientation();
-        }, 500); // 延遲確保DOM已完全載入
+    const titleElem = document.getElementById('page-title');
+    if (titleElem) titleElem.textContent = `${cardData.frontName} - 名片`;
+
+    // 填入現有 DOM 結構
+    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value || ''; };
+    setText('front-name', cardData.frontName);
+    setText('front-phone', cardData.frontPhone);
+    setText('front-email', maskEmail(cardData.frontEmail));
+    setText('front-skills', cardData.skills);
+    setText('front-brief', cardData.brief);
+    setText('back-name', cardData.backName);
+    setText('back-phone', cardData.backPhone);
+    setText('back-email', maskEmail(cardData.backEmail));
+
+    // 事件：翻轉 + iOS 權限 gate（第一次點擊同時請求）
+    const card = document.getElementById('business-card');
+    if (card) {
+        card.addEventListener('click', async (e) => {
+            e.currentTarget.classList.toggle('flipped');
+            if (!orientationInitialized) {
+                await ensureDeviceOrientationStarted();
+            }
+        });
+        // 預設靜態反光透明度
+        card.style.setProperty('--reflection-opacity', 0.45);
     }
+
+    // 分享與複製
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: `${cardData.frontName}的名片`,
+                    url: window.location.href
+                });
+            } else {
+                alert('此瀏覽器不支援分享功能');
+            }
+        });
+    }
+    const copyBtn = document.getElementById('copy-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(`${cardData.frontName}\n${cardData.frontPhone}\n${cardData.frontEmail}`);
+            alert('聯絡資訊已複製');
+        });
+    }
+
+    // 音樂播放器
+    const audio = document.getElementById('music-player');
+    if (audio && typeof audio.load === 'function') audio.load();
+
+    // 若資料指示採用金屬風格或 HTML 已有對應類別，則啟用動態反光（非 iOS 瀏覽器可即刻啟動）
+    if (cardData.styleId === 'metallic' || document.querySelector('.business-card')) {
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+            ensureDeviceOrientationStarted();
+        }
+    }
+}
+
+// 自動啟動
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadCardData);
+} else {
+    loadCardData();
 }
 
