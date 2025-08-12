@@ -29,10 +29,11 @@ function maskEmail(email) {
     const [name, domain] = email.split('@');
     return name[0] + "***@" + domain;
 }
+
 // 更新金屬效果
 function updateMetallicEffect(alpha, beta, gamma) {
     const card = document.getElementById('business-card');
-    if (!card || !card.classList.contains('theme-metallic')) return;
+    if (!card) return;
     
     // 將角度轉換為適合的漸層角度
     const metalAngle = ((alpha || 0) + 135) % 360;
@@ -45,12 +46,7 @@ function updateMetallicEffect(alpha, beta, gamma) {
     // 更新CSS自定義屬性
     card.style.setProperty('--metal-angle', `${metalAngle}deg`);
     card.style.setProperty('--reflection-angle', `${reflectionAngle}deg`);
-    
-    // 更新反光層
-    const beforeElement = card.querySelector('::before');
-    if (card.style.setProperty) {
-        card.style.setProperty('--reflection-opacity', reflection);
-    }
+    card.style.setProperty('--reflection-opacity', reflection);
 }
 
 // 初始化設備方向偵測
@@ -97,6 +93,7 @@ function startOrientationListening() {
 }
 
 
+
 async function fetchCardList() {
     const data = await fetchSheetData();
     const listElem = document.getElementById('card-list');
@@ -123,8 +120,7 @@ async function loadSingleCard() {
         document.body.innerHTML = '<p>找不到該名片</p>';
         return;
     }
-    // 主題套用
-    document.body.classList.add(`theme-${cardData.styleId}`);
+
     // 前後內容
     document.getElementById('card-front').innerHTML = `
         <h2>${cardData.frontName}</h2>

@@ -196,8 +196,8 @@
       .card-main, .card-audio-player { width: 90vw !important; max-width: 93vw !important; }
       .card-logo img { width: 90vw !important; max-width: 93vw !important;}
     }
-            /* 金屬主題樣式 */
-            .theme-metallic .business-card {
+        /* 全域金屬主題樣式 */
+        .business-card {
             background: linear-gradient(
                 var(--metal-angle, 135deg),
                 #c0c0c0 0%,
@@ -207,16 +207,16 @@
                 #d0d0d0 60%,
                 #f0f0f0 75%,
                 #b8b8b8 100%
-            );
+            ) !important;
             box-shadow: 
                 0 8px 32px rgba(0,0,0,0.4),
                 inset 0 1px 0 rgba(255,255,255,0.9),
-                inset 0 -1px 0 rgba(0,0,0,0.1);
+                inset 0 -1px 0 rgba(0,0,0,0.1) !important;
             position: relative;
             overflow: hidden;
         }
 
-        .theme-metallic .business-card::before {
+        .business-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -235,33 +235,34 @@
             transition: all 0.3s ease;
         }
 
-        .theme-metallic .card-content {
+        .card-content {
             position: relative;
             z-index: 2;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        .theme-metallic .card-content h2 {
-            color: #2c3e50;
+        .card-content h2 {
+            color: #2c3e50 !important;
             font-weight: 700;
         }
 
-        .theme-metallic .card-content p {
-            color: #34495e;
+        .card-content p {
+            color: #34495e !important;
         }
 
-        .theme-metallic .business-card.flipped {
+        .business-card.flipped {
             transform: rotateY(180deg);
             box-shadow: 
                 0 8px 32px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.8);
+                inset 0 1px 0 rgba(255,255,255,0.8) !important;
         }
 
         /* 金屬反光動態效果 */
-        .theme-metallic .business-card {
+        .business-card {
             --metal-angle: 135deg;
             --reflection-angle: 45deg;
         }
+
 
   </style>
 </head>
