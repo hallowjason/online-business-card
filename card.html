@@ -19,8 +19,8 @@
       min-height: 100vh;
     }
     .card {
-      width: 390px;
-      height: 540px;
+      width: 360px;
+      height: 580px;
       border-radius: 16px;
       position: relative;
       transition: transform 0.6s;
@@ -59,7 +59,7 @@
     }
     /* 內容主區塊，左右邊界和logo對齊 */
     .card-main {
-      width: 318px; /* 390-(36*2) */
+      width: 288px; /* 360-(36*2) */
       min-height: 10px;
       margin: 0 auto;
       padding: 0;
@@ -69,7 +69,7 @@
     }
     /* LOGO圖片 */
     .card-logo img {
-      width: 318px;
+      width: 288px;
       max-width: 100%;
       height: auto;
       display: block;
@@ -119,8 +119,8 @@
       margin-top: 20px;
       background: #000;
       border-radius: 11px;
-      padding: 14px 18px 10px 18px;
-      width: 318px;
+      padding: 20px 18px 16px 18px;
+      width: 288px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -131,28 +131,28 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 6px;
+      margin-bottom: 12px;
     }
     .audio-meta .song {
       color: #fff;
       font-size: 0.82rem;
       font-weight: 600;
-      line-height: 1.2;
-      margin-bottom: 2px;
+      line-height: 1.3;
+      margin-bottom: 4px;
       text-shadow: 0 1px 4px #12121299;
     }
     .audio-meta .artist {
       color: #e1e1e1;
       font-size: 0.78rem;
       font-weight: 400;
-      line-height: 1;
+      line-height: 1.2;
       text-shadow: 0 1px 4px #1212127f;
     }
     audio {
       width: 100%;
       outline: none;
-      height: 30px;
-      margin-top: 0;
+      height: 32px;
+      margin-top: 4px;
       background: transparent;
       border-radius: 8px;
     }
@@ -192,9 +192,9 @@
     }
     /* 行動裝置最佳化 */
     @media (max-width: 440px) {
-      .card, .card-main, .card-audio-player { width: 95vw !important; max-width: 98vw !important;}
-      .card-main, .card-audio-player { width: 90vw !important; max-width: 93vw !important; }
-      .card-logo img { width: 90vw !important; max-width: 93vw !important;}
+      .card { width: 90vw !important; max-width: 92vw !important; }
+      .card-main, .card-audio-player { width: 82vw !important; max-width: 84vw !important; }
+      .card-logo img { width: 82vw !important; max-width: 84vw !important; }
     }
         /* 全域金屬主題樣式 */
         .business-card {
@@ -233,6 +233,13 @@
             );
             pointer-events: none;
             transition: all 0.3s ease;
+            opacity: var(--reflection-opacity, 0.45);
+            z-index: 1;
+        }
+        /* 讓面板內的所有內容覆蓋在反光層之上 */
+        .card .front > *, .card .back > * {
+          position: relative;
+          z-index: 2;
         }
 
         .card-content {
@@ -257,11 +264,7 @@
                 inset 0 1px 0 rgba(255,255,255,0.8) !important;
         }
 
-        /* 金屬反光動態效果 */
-        .business-card {
-            --metal-angle: 135deg;
-            --reflection-angle: 45deg;
-        }
+        /* 金屬反光動態效果：角度預設交由 var() fallback 提供 */
 
 
   </style>
@@ -270,7 +273,7 @@
   <div class="card-container">
     <div class="card" id="business-card">
       <!-- 正面 -->
-      <div class="front" id="card-front">
+      <div class="front business-card" id="card-front">
         <div class="card-logo">
           <img src="assets/images/logo-front.png" alt="Logo Front">
         </div>
@@ -298,7 +301,7 @@
         <div class="card-bottom-tip">TAP TO FLIP</div>
       </div>
       <!-- 背面 -->
-      <div class="back" id="card-back">
+      <div class="back business-card" id="card-back">
         <div class="card-logo">
           <img src="assets/images/logo-back.png" alt="Logo Back">
         </div>
@@ -346,6 +349,47 @@ async function fetchSheetData() {
   }));
 }
 
+// 金屬動態反光：更新CSS變數
+function updateMetallicEffectLocal(alpha, beta, gamma) {
+  const root = document.getElementById('business-card');
+  if (!root) return;
+  const metalAngle = ((alpha || 0) + 135) % 360;
+  const reflectionAngle = ((gamma || 0) * 2 + 45) % 360;
+  const intensity = Math.min(1, Math.abs(beta || 0) / 90);
+  const reflection = Math.min(0.6, 0.25 + intensity * 0.35);
+  root.style.setProperty('--metal-angle', `${metalAngle}deg`);
+  root.style.setProperty('--reflection-angle', `${reflectionAngle}deg`);
+  root.style.setProperty('--reflection-opacity', reflection);
+}
+
+// 初始化動態反光（含 iOS 權限處理）
+function initCardMetallic() {
+  const root = document.getElementById('business-card');
+  if (root) root.style.setProperty('--reflection-opacity', 0.45);
+
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    const request = () => {
+      DeviceOrientationEvent.requestPermission().then(state => {
+        if (state === 'granted') {
+          window.addEventListener('deviceorientation', (e) => {
+            updateMetallicEffectLocal(e.alpha, e.beta, e.gamma);
+          });
+        }
+      }).catch(console.error);
+    };
+    const card = document.getElementById('business-card');
+    if (card) {
+      const once = () => { request(); card.removeEventListener('click', once); };
+      card.addEventListener('click', once);
+    }
+  } else if (typeof DeviceOrientationEvent !== 'undefined') {
+    window.addEventListener('deviceorientation', (e) => {
+      updateMetallicEffectLocal(e.alpha, e.beta, e.gamma);
+    });
+  }
+}
+
 async function loadCardData() {
   const params = new URLSearchParams(window.location.search);
   const userKey = params.get('user');
@@ -388,6 +432,7 @@ async function loadCardData() {
   });
 
   document.getElementById('music-player').load();
+  initCardMetallic();
 }
 
 loadCardData();
