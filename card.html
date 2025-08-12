@@ -254,6 +254,50 @@
             opacity: var(--reflection-opacity, 0.45);
             z-index: 1;
         }
+        /* 正面強化：高對比反光與刷紋（覆寫共用 ::before，僅作用於正面） */
+        .front.business-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              var(--reflection-angle, 45deg),
+              rgba(255,255,255,0.90) 12%,
+              rgba(255,255,255,0.55) 20%,
+              rgba(255,255,255,0.20) 34%,
+              transparent 56%
+            ),
+            linear-gradient(
+              var(--reflection-angle, 45deg),
+              transparent 0%,
+              rgba(255,255,255,0.25) 48%,
+              transparent 60%
+            );
+          opacity: calc(var(--reflection-opacity, 0.45) + 0.12);
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        .front.business-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          /* 允許可選個人化背景（frontBg）+ 刷紋層 */
+          background:
+            var(--front-bg, none),
+            repeating-linear-gradient(
+              calc(var(--metal-angle, 160deg) + 90deg),
+              rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px,
+              rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+            );
+          background-size: cover, auto;
+          background-position: center, center;
+          background-repeat: no-repeat, repeat;
+          mix-blend-mode: overlay;
+          opacity: 0.18;
+          z-index: 1;
+          pointer-events: none;
+        }
         /* 讓面板內主要內容覆蓋在反光層之上，但排除底部提示，避免定位被覆蓋 */
         .card .front > :not(.card-bottom-tip),
         .card .back  > :not(.card-bottom-tip) {
@@ -294,6 +338,30 @@
         }
 
         /* 金屬反光動態效果：角度預設交由 var() fallback 提供 */
+
+        /* 徽章樣式（前端展示） */
+        .card-badges {
+          margin-top: 12px;
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+        .card-badge {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #2b2b2b;
+          background: linear-gradient(180deg, #ffffff, #e9edf3);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.2);
+          overflow: hidden;
+          text-transform: uppercase;
+        }
 
 
   </style>

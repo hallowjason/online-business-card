@@ -22,7 +22,9 @@ async function fetchSheetData() {
         skills: row[7],
         brief: row[8],
         styleId: row[9] || 'default',
-        customLink: row[10] || ''
+        customLink: row[10] || '',
+        frontBg: row[11] || '',
+        badges: row[12] || ''
     }));
 }
 
@@ -147,6 +149,12 @@ async function loadCardData() {
         });
         // 預設靜態反光透明度
         card.style.setProperty('--reflection-opacity', 0.45);
+    }
+
+    // 個人化正面背景（不影響金屬高光與刷紋）
+    const frontPanel = document.getElementById('card-front');
+    if (cardData.frontBg && frontPanel) {
+        frontPanel.style.setProperty('--front-bg', `url("${cardData.frontBg}")`);
     }
 
     // 分享與複製
