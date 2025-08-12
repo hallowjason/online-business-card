@@ -196,6 +196,73 @@
       .card-main, .card-audio-player { width: 90vw !important; max-width: 93vw !important; }
       .card-logo img { width: 90vw !important; max-width: 93vw !important;}
     }
+            /* 金屬主題樣式 */
+            .theme-metallic .business-card {
+            background: linear-gradient(
+                var(--metal-angle, 135deg),
+                #c0c0c0 0%,
+                #f5f5f5 15%,
+                #ffffff 30%,
+                #e8e8e8 45%,
+                #d0d0d0 60%,
+                #f0f0f0 75%,
+                #b8b8b8 100%
+            );
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.9),
+                inset 0 -1px 0 rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-metallic .business-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                var(--reflection-angle, 45deg),
+                transparent 0%,
+                rgba(255,255,255,0.3) 30%,
+                rgba(255,255,255,0.6) 50%,
+                rgba(255,255,255,0.3) 70%,
+                transparent 100%
+            );
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .theme-metallic .card-content {
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .theme-metallic .card-content h2 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .theme-metallic .card-content p {
+            color: #34495e;
+        }
+
+        .theme-metallic .business-card.flipped {
+            transform: rotateY(180deg);
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        /* 金屬反光動態效果 */
+        .theme-metallic .business-card {
+            --metal-angle: 135deg;
+            --reflection-angle: 45deg;
+        }
+
   </style>
 </head>
 <body>
