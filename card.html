@@ -17,6 +17,8 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      perspective: 1200px;
+      -webkit-perspective: 1200px;
     }
     .card {
       width: 360px;
@@ -24,14 +26,18 @@
       border-radius: 16px;
       position: relative;
       transition: transform 0.6s;
+      -webkit-transition: -webkit-transform 0.6s;
       transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
       box-shadow: 0 6px 32px 0 rgba(0,0,0,0.28);
       background: transparent;
       perspective: 1200px;
+      -webkit-perspective: 1200px;
       cursor: pointer;
     }
     .card.flipped {
       transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
     }
     .card .front, .card .back {
       position: absolute;
@@ -40,11 +46,14 @@
       border-radius: 16px;
       box-sizing: border-box;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       padding: 0;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
     }
     /* 正面白灰漸層底色 */
     .card .front {
@@ -56,6 +65,7 @@
       background: linear-gradient(148deg, #202229 0%, #0b0c0f 100%);
       color: #fff;
       transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
     }
     /* 內容主區塊，左右邊界和logo對齊 */
     .card-main {
@@ -206,29 +216,33 @@
             overflow: hidden;
         }
 
-        /* 正面：明顯銀白底（角度動態） */
+        /* 正面：強烈銀白金屬質感（角度動態） */
         .front.business-card {
           background: linear-gradient(
             var(--metal-angle, 160deg),
             #ffffff 0%,
-            #f8fafc 18%,
-            #eef2f7 36%,
-            #e6ebf2 54%,
-            #f7f9fb 72%,
-            #e9edf3 100%
+            #f0f4f8 15%,
+            #e8edf2 30%,
+            #d8e0e8 45%,
+            #e0e8f0 60%,
+            #f0f8ff 75%,
+            #e8f0f8 90%,
+            #ffffff 100%
           ) !important;
           color: #191919;
         }
 
-        /* 背面：明顯銀黑底（角度動態） */
+        /* 背面：強烈銀黑金屬質感（角度動態） */
         .back.business-card {
           background: linear-gradient(
             var(--metal-angle, 160deg),
-            #3a3d44 0%,
-            #272a2f 25%,
-            #191b20 50%,
-            #0f1114 70%,
-            #07080a 85%,
+            #4a4d54 0%,
+            #3a3d44 15%,
+            #2a2d34 30%,
+            #1a1d24 45%,
+            #0f1219 60%,
+            #080b12 75%,
+            #05080f 90%,
             #000000 100%
           ) !important;
           color: #fff;
@@ -254,7 +268,7 @@
             opacity: var(--reflection-opacity, 0.45);
             z-index: 1;
         }
-        /* 正面強化：高對比反光與刷紋（覆寫共用 ::before，僅作用於正面） */
+        /* 正面強化：強烈金屬反光效果（覆寫共用 ::before，僅作用於正面） */
         .front.business-card::before {
           content: '';
           position: absolute;
@@ -262,18 +276,20 @@
           background:
             linear-gradient(
               var(--reflection-angle, 45deg),
-              rgba(255,255,255,0.90) 12%,
-              rgba(255,255,255,0.55) 20%,
-              rgba(255,255,255,0.20) 34%,
-              transparent 56%
+              rgba(255,255,255,0.95) 8%,
+              rgba(255,255,255,0.75) 15%,
+              rgba(255,255,255,0.45) 25%,
+              rgba(255,255,255,0.15) 40%,
+              transparent 60%
             ),
             linear-gradient(
-              var(--reflection-angle, 45deg),
+              calc(var(--reflection-angle, 45deg) + 90deg),
               transparent 0%,
-              rgba(255,255,255,0.25) 48%,
-              transparent 60%
+              rgba(255,255,255,0.35) 35%,
+              rgba(255,255,255,0.15) 50%,
+              transparent 65%
             );
-          opacity: calc(var(--reflection-opacity, 0.45) + 0.12);
+          opacity: calc(var(--reflection-opacity, 0.45) + 0.25);
           z-index: 1;
           pointer-events: none;
         }
@@ -282,19 +298,47 @@
           content: '';
           position: absolute;
           inset: 0;
-          /* 允許可選個人化背景（frontBg）+ 刷紋層 */
+          /* 允許可選個人化背景（frontBg）+ 強化金屬反光層 */
           background:
             var(--front-bg, none),
-            repeating-linear-gradient(
-              calc(var(--metal-angle, 160deg) + 90deg),
-              rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px,
-              rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+            linear-gradient(
+              calc(var(--reflection-angle, 45deg) + 90deg),
+              rgba(255,255,255,0.15) 0%,
+              rgba(255,255,255,0.08) 25%,
+              rgba(255,255,255,0.12) 50%,
+              rgba(255,255,255,0.06) 75%,
+              rgba(255,255,255,0.10) 100%
             );
-          background-size: cover, auto;
+          background-size: cover, 100% 100%;
           background-position: center, center;
-          background-repeat: no-repeat, repeat;
-          mix-blend-mode: overlay;
-          opacity: 0.18;
+          background-repeat: no-repeat, no-repeat;
+          mix-blend-mode: soft-light;
+          opacity: 0.25;
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        /* 背面金屬反光效果 */
+        .back.business-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              var(--reflection-angle, 45deg),
+              rgba(255,255,255,0.25) 10%,
+              rgba(255,255,255,0.15) 20%,
+              rgba(255,255,255,0.08) 35%,
+              transparent 55%
+            ),
+            linear-gradient(
+              calc(var(--reflection-angle, 45deg) + 90deg),
+              transparent 0%,
+              rgba(255,255,255,0.12) 30%,
+              rgba(255,255,255,0.06) 45%,
+              transparent 60%
+            );
+          opacity: calc(var(--reflection-opacity, 0.45) * 0.6);
           z-index: 1;
           pointer-events: none;
         }
@@ -332,6 +376,7 @@
 
         .business-card.flipped {
             transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
             box-shadow: 
                 0 8px 32px rgba(0,0,0,0.5),
                 inset 0 1px 0 rgba(255,255,255,0.8) !important;
